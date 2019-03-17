@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <title>グラフ描画</title>
+    <meta charset="UTF-8" />
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+    <h1>3Dグラフ描画</h1>
+    <p>CSVファイルを選択してください。</p>
+    <input type="file" id="filepath" name="filepath" onchange="handleFiles(this.files)" />
+
+    <!-- Plotly chart will be drawn inside this DIV -->
+    <div id="graph"></div>
+    <script>
+        function handleFiles(files) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var rows = Plotly.d3.csv.parseRows(e.target.result);
+                    function unpack(rows, idx) {
+                        return rows.map(function (row) { return row[idx]; });
+                    }
+                    var x = unpack(rows, 0);
+                    var y = unpack(rows, 1);
+                    var z = unpack(rows, 2);
+                    var c1 = [];
+                    var c2 = [];
+
+                    var zeroarray = []
+                    for (var i = 0; i < x.length; i++) {
+                        zeroarray[i] = 0;
+                        c1[i] = '#ff0000';
+                        c2[i] = '#000000';
+                    }
+
+                    var withheight = {
+                        name: 'with Height',
+                        type: 'scatter3d',
+                        mode: 'lines',
+                        x: x,
+                        y: y,
+                        z: z,
+                        opacity: 1,
+                        line: {
+                            width: 6,
+                            color: '#ff0000',
+                            reversescale: false
+                        }
+                    };
+                    var withoutheight = {
+                        name: 'without Height',
+                        type: 'scatter3d',
+                        mode: 'lines',
+                        x: x,
+                        y: y,
+                        z: zeroarray,
+                        opacity: 1,
+                        line: {
+                            width: 3,
+                            color: '#000000',
+                            reversescale: false
+                        }
+                    };
+
+                    Plotly.plot('graph', [withheight, withoutheight], { height: 800 }, { showSendToCloud: true });
+                };
+                reader.readAsText(file);
+            }
+        }
+    </script>
+</body>
+
+</html>
